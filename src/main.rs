@@ -1,21 +1,35 @@
 mod objects;
 mod camera;
-mod images;
+mod intersections;
 
 use objects::sphere::Sphere;
 use objects::line::Line;
+use objects::v3::V3;
 
-use crate::camera::generateImg;
+//use crate::camera::generateImg;
 
 use std::io::Cursor;
 use image::ImageReader;
 
 fn main() {
 
-    let p0 = [0.0, 0.0, 0.0]; // Point de départ de la droite
-    let mut d = [1.0, 0.0, 0.6];  // Direction de la droite
-    let c = [2.0, 0.0, 0.0];  // Centre de la sphère
-    let r = 1.0;              // Rayon de la sphère
+    let sphere1 = Sphere {
+        center: V3 {x: 2.0, y: 0.0, z:0.0},
+        radius: 1.0
+    };
+
+    let sphere2 = Sphere {
+        center: V3 {x: 2.0, y: 0.0, z:2.0},
+        radius: 0.5
+    };
+
+    let mut droite = Line {
+        pos: V3 {x: 0.0, y: 0.0, z:0.0},
+        dir: V3 {x: 1.0, y: 0.0, z:0.6}
+    };
+
+    let geometries = vec![&sphere1, &sphere2];
+
 
     let weird_depth = 100.0;
     let cam_width = 200;
@@ -25,37 +39,18 @@ fn main() {
 
     for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
 
-        d[2] = (((x as i32)-(cam_width/2) as i32) as f64)/weird_depth;
-        d[1] = (((y as i32)-(cam_height/2) as i32) as f64)/weird_depth;
+        droite.dir.z = (((x as i32)-(cam_width/2) as i32) as f64)/weird_depth;
+        droite.dir.y = (((y as i32)-(cam_height/2) as i32) as f64)/weird_depth;
 
         let white : u8 = 254;
+        *pixel = image::Rgb([0,0,0]);
 
-        if intersection_droite_sphere(p0, d, c, r) {
-            *pixel = image::Rgb([white,white,white]);
-        } else {
-            *pixel = image::Rgb([0,0,0]);
+        for geometry in &geometries {
+            if intersections::line_and_sphere(&droite, &geometry) {
+                *pixel = image::Rgb([white,white,white]);
+            }
         }
     }
     imgbuf.save("test.png").unwrap();
 }
 
-fn intersection_droite_sphere(
-    p0: [f64; 3], // Point de départ de la droite
-    d: [f64; 3],  // Direction de la droite
-    c: [f64; 3],  // Centre de la sphère
-    r: f64        // Rayon de la sphère
-) -> bool {
-    let l = [
-        p0[0] - c[0],
-        p0[1] - c[1],
-        p0[2] - c[2],
-    ];
-
-    let a = d[0] * d[0] + d[1] * d[1] + d[2] * d[2]; // d · d
-    let b = 2.0 * (d[0] * l[0] + d[1] * l[1] + d[2] * l[2]); // 2 * (d · L)
-    let c = (l[0] * l[0] + l[1] * l[1] + l[2] * l[2]) - r * r; // L · L - R^2
-
-    let discriminant = b * b - 4.0 * a * c;
-
-    discriminant >= 0.0
-}
