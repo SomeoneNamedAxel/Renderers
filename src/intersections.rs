@@ -1,7 +1,7 @@
 use crate::objects::{line::Line, sphere::Sphere};
+use crate::objects::v3::V3;
 
-pub fn line_and_sphere(line: &Line, sphere: &Sphere) -> bool
-{
+pub fn line_and_sphere_intersection(line: &Line, sphere: &Sphere) -> Option<Vec<V3>> {
     let l = [
         line.pos.x - sphere.center.x,
         line.pos.y - sphere.center.y,
@@ -14,5 +14,31 @@ pub fn line_and_sphere(line: &Line, sphere: &Sphere) -> bool
 
     let discriminant = b * b - 4.0 * a * c;
 
-    discriminant >= 0.0
+    if discriminant < 0.0 {
+        return None;
+    }
+
+    let sqrt_discriminant = discriminant.sqrt();
+    let t1 = (-b - sqrt_discriminant) / (2.0 * a);
+    let t2 = (-b + sqrt_discriminant) / (2.0 * a);
+
+    let mut points = Vec::new();
+
+    let point1 = V3 {
+        x: line.pos.x + t1 * line.dir.x,
+        y: line.pos.y + t1 * line.dir.y,
+        z: line.pos.z + t1 * line.dir.z,
+    };
+    points.push(point1);
+
+    if discriminant > 0.0 {
+        let point2 = V3 {
+            x: line.pos.x + t2 * line.dir.x,
+            y: line.pos.y + t2 * line.dir.y,
+            z: line.pos.z + t2 * line.dir.z,
+        };
+        points.push(point2);
+    }
+
+    Some(points)
 }
