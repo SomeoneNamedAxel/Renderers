@@ -30,6 +30,7 @@ pub fn line_and_sphere_intersection(line: &Line, sphere: &Sphere) -> Option<Vec<
         z: line.pos.z + t1 * line.dir.z,
     };
     points.push(point1);
+    //println!("point 1: {},{},{}", points[0].x,points[0].y,points[0].z);
 
     if discriminant > 0.0 {
         let point2 = V3 {
@@ -38,6 +39,7 @@ pub fn line_and_sphere_intersection(line: &Line, sphere: &Sphere) -> Option<Vec<
             z: line.pos.z + t2 * line.dir.z,
         };
         points.push(point2);
+        //println!("point 2: {},{},{}", points[1].x,points[1].y,points[1].z);
     }
 
     Some(points)
