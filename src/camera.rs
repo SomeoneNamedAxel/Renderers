@@ -1,5 +1,6 @@
 use std::cmp::min;
 use crate::objects::geometry::Geometry;
+use crate::objects::geometry::Geometry;
 use crate::objects::line::Line;
 use crate::objects::v3::V3;
 
@@ -51,7 +52,7 @@ impl Camera {
                     let ray_to_light_intersections : Vec<V3>= geometry.get_intersections_points(&ray_to_light).unwrap_or(Vec::new());
 
 
-                    
+
                     if !ray_to_light_intersections.is_empty() {
                         *pixel = image::Rgb([10, 10, 10]); // Shadow color
                     } else {

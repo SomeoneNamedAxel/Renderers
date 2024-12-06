@@ -10,6 +10,7 @@ use objects::sphere::Sphere;
 use objects::v3::V3;
 use std::io::stdin;
 
+
 fn main() {
 
     let sphere1 = Sphere {
