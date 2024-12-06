@@ -9,6 +9,8 @@ use objects::v3::V3;
 use std::io::stdin;
 use crate::camera::Camera;
 use crate::graphics::rgb::RGB;
+use std::time::Instant;
+
 
 fn main() {
 
@@ -19,20 +21,19 @@ fn main() {
     };
 
     let sphere2 = Sphere {
-        center: V3 {x: 2.0, y: 2.0, z:0.0},
-        radius: 0.5,
+        center: V3 {x: 2.0, y: 1.0, z:0.0},
+        radius: 0.2,
         color: RGB {r: 255, g: 0, b: 0},
     };
 
-    let mut light_pos = V3 {x: 2.0, y:0.0, z:1.0};
+    let mut light_pos = V3 {x: 2.0, y:1.0, z:0.0};
 
     let mut light_point = light_pos;
 
     let cam = Camera {
         pos: V3 {x: 0.0, y: 0.0, z:0.0},
         height: 1080,
-        width: 1920,
-        weird_depth: 1000.0
+        width: 1920
     };
 
     
@@ -54,7 +55,12 @@ fn main() {
         light_pos.y = nbr_input;
         light_point.y = nbr_input;
 
+        let now = Instant::now();
+
         cam.take_picture(&geometries, &light_point, "test.png");
+
+        let elapsed = now.elapsed();
+        println!("Elapsed: {:.2?}", elapsed);
     }
 
     

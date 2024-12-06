@@ -1,3 +1,4 @@
+use std::cmp::min;
 use crate::intersections;
 use crate::objects::line::Line;
 use crate::objects::sphere::Sphere;
@@ -7,8 +8,7 @@ use crate::objects::v3::V3;
 pub struct Camera {
     pub pos: V3,
     pub width: u32,
-    pub height: u32,
-    pub weird_depth: f64
+    pub height: u32
 }
 
 impl Camera {
@@ -21,8 +21,8 @@ impl Camera {
         let mut imgbuf = image::ImageBuffer::new(self.width, self.height);
 
         for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
-            ray.dir.y = (((x as i32) - (self.width / 2) as i32) as f64) / self.weird_depth;
-            ray.dir.z = -(((y as i32) - (self.height / 2) as i32) as f64) / self.weird_depth;
+            ray.dir.y = (((x as i32) - (self.width / 2) as i32) as f64) / min(self.width, self.height) as f64;
+            ray.dir.z = -(((y as i32) - (self.height / 2) as i32) as f64) / min(self.width, self.height) as f64;
 
             *pixel = image::Rgb([0, 0, 0]);
 
