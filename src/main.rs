@@ -3,11 +3,11 @@ mod camera;
 mod intersections;
 mod graphics;
 
+use image::io;
 use objects::sphere::Sphere;
-use objects::line::Line;
 use objects::v3::V3;
-
-use crate::camera::{Camera};
+use std::io::stdin;
+use crate::camera::Camera;
 use crate::graphics::rgb::RGB;
 
 fn main() {
@@ -19,21 +19,14 @@ fn main() {
     };
 
     let sphere2 = Sphere {
-        center: V3 {x: 2.0, y: 0.0, z:2.0},
+        center: V3 {x: 2.0, y: 2.0, z:0.0},
         radius: 0.5,
         color: RGB {r: 255, g: 0, b: 0},
     };
 
-    let temoin_point_1 = Sphere {
-        center: V3 {x:  1.7034243813445806, y:-0.3781602126584969, z:0.13797737488891104},
-        radius: 0.01,
-        color: RGB {r: 0, g: 0, b: 255},
-    };
-    let temoin_point_2 = Sphere {
-        center: V3 {x: 2.0, y:1.0, z:0.0},
-        radius: 0.01,
-        color: RGB {r: 0, g: 255, b: 0},
-    };
+    let mut light_pos = V3 {x: 2.0, y:0.0, z:1.0};
+
+    let mut light_point = light_pos;
 
     let cam = Camera {
         pos: V3 {x: 0.0, y: 0.0, z:0.0},
@@ -42,11 +35,29 @@ fn main() {
         weird_depth: 1000.0
     };
 
-    let light_point = V3 {x: 2.0, y:0.0, z:1.0};
+    
 
-    let geometries = vec![&sphere1, &sphere2, &temoin_point_1, &temoin_point_2];
+    let geometries = vec![&sphere1, &sphere2];
 
-    cam.take_picture(&geometries, &light_point, "test.png");
+    loop {
+        println!("light y pos : ");
+
+        let mut input = String::new();
+    
+        stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
+    
+        
+        let input = input.trim();
+        let nbr_input : f64 = input.parse::<f64>().unwrap();
+        light_pos.y = nbr_input;
+        light_point.y = nbr_input;
+
+        cam.take_picture(&geometries, &light_point, "test.png");
+    }
+
+    
 
 }
 

@@ -21,30 +21,41 @@ impl Camera {
         let mut imgbuf = image::ImageBuffer::new(self.width, self.height);
 
         for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
-            ray.dir.z = (((x as i32) - (self.width / 2) as i32) as f64) / self.weird_depth;
-            ray.dir.y = (((y as i32) - (self.height / 2) as i32) as f64) / self.weird_depth;
+            ray.dir.y = (((x as i32) - (self.width / 2) as i32) as f64) / self.weird_depth;
+            ray.dir.z = -(((y as i32) - (self.height / 2) as i32) as f64) / self.weird_depth;
 
-            let white: u8 = 254;
             *pixel = image::Rgb([0, 0, 0]);
+
+            
 
             for geometry in geometries {
                 let intersection_result = intersections::line_and_sphere_intersection(&ray, &geometry).unwrap_or(Vec::new());
 
                 if !intersection_result.is_empty() {
-                    //println!("{},{},{}", intersection_result.iter().next().unwrap().x, intersection_result.iter().next().unwrap().y, intersection_result.iter().next().unwrap().z);
+                    let intersection_point = *intersection_result.iter().next().unwrap();
                     let ray_to_light = Line {
-                        pos: *intersection_result.iter().next().unwrap(),
-                        dir: *light_sources
+                        pos: intersection_point,
+                        dir: (*light_sources),
                     };
-                    //println!("ray_to_light pos : {},{},{}", intersection_result.iter().next().unwrap().x,intersection_result.iter().next().unwrap().y,intersection_result.iter().next().unwrap().z);
-                    //println!("ray_to_light dir : {},{},{}", light_sources.x,light_sources.y,light_sources.z);
 
+                    let epsilon = 1e-5; // Small offset to avoid self-intersection
+                    let ray_to_light = Line {
+                        pos: V3 {
+                            x: intersection_point.x + epsilon * ray_to_light.dir.x,
+                            y: intersection_point.y + epsilon * ray_to_light.dir.y,
+                            z: intersection_point.z + epsilon * ray_to_light.dir.z,
+                        },
+                        dir: (*light_sources - intersection_point).normalize(),
+                    };
+                    
 
+                    let ray_to_light_intersections : Vec<V3>= intersections::line_and_sphere_intersection(&ray_to_light, &geometry).unwrap_or(Vec::new());
 
-                    if intersections::line_and_sphere_intersection(&ray_to_light, &geometry).is_some() {
-                        *pixel = image::Rgb([geometry.color.r, geometry.color.g, geometry.color.b]);
+                    
+                    if !ray_to_light_intersections.is_empty() {
+                        *pixel = image::Rgb([10, 10, 10]); // Shadow color
                     } else {
-                        *pixel = image::Rgb([0, 0, 0]);
+                        *pixel = image::Rgb([geometry.color.r, geometry.color.g, geometry.color.b]); // Lit color
                     }
                 }
             }

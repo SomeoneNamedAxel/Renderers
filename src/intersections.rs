@@ -15,7 +15,7 @@ pub fn line_and_sphere_intersection(line: &Line, sphere: &Sphere) -> Option<Vec<
     let discriminant = b * b - 4.0 * a * c;
 
     if discriminant < 0.0 {
-        return None;
+        return None; // No intersection
     }
 
     let sqrt_discriminant = discriminant.sqrt();
@@ -24,23 +24,25 @@ pub fn line_and_sphere_intersection(line: &Line, sphere: &Sphere) -> Option<Vec<
 
     let mut points = Vec::new();
 
-    let point1 = V3 {
-        x: line.pos.x + t1 * line.dir.x,
-        y: line.pos.y + t1 * line.dir.y,
-        z: line.pos.z + t1 * line.dir.z,
-    };
-    points.push(point1);
-    //println!("point 1: {},{},{}", points[0].x,points[0].y,points[0].z);
+    if t1 > 0.0 {
+        points.push(V3 {
+            x: line.pos.x + t1 * line.dir.x,
+            y: line.pos.y + t1 * line.dir.y,
+            z: line.pos.z + t1 * line.dir.z,
+        });
+    }
 
-    if discriminant > 0.0 {
-        let point2 = V3 {
+    if t2 > 0.0 {
+        points.push(V3 {
             x: line.pos.x + t2 * line.dir.x,
             y: line.pos.y + t2 * line.dir.y,
             z: line.pos.z + t2 * line.dir.z,
-        };
-        points.push(point2);
-        //println!("point 2: {},{},{}", points[1].x,points[1].y,points[1].z);
+        });
     }
 
-    Some(points)
+    if points.is_empty() {
+        None
+    } else {
+        Some(points)
+    }
 }
