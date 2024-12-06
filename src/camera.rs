@@ -1,5 +1,6 @@
 use std::cmp::min;
 use crate::intersections;
+use crate::objects::geometry::Geometry;
 use crate::objects::line::Line;
 use crate::objects::sphere::Sphere;
 use crate::objects::v3::V3;
@@ -12,7 +13,7 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn take_picture(self, geometries: &Vec<&Sphere>, light_sources: &V3, img_path: &str) {
+    pub fn take_picture(self, geometries: &Vec<Box<dyn Geometry>>, light_sources: &V3, img_path: &str) {
         let mut ray = Line {
             pos: V3 { x: 0.0, y: 0.0, z: 0.0 },
             dir: V3 { x: 1.0, y: 0.0, z: 0.6 }
@@ -28,8 +29,8 @@ impl Camera {
 
             
 
-            for geometry in geometries {
-                let intersection_result = intersections::line_and_sphere_intersection(&ray, &geometry).unwrap_or(Vec::new());
+            for geometry in geometries.iter() {
+                let intersection_result = geometry.get_intersections_points(&ray).unwrap_or(Vec::new());
 
                 if !intersection_result.is_empty() {
                     let intersection_point = *intersection_result.iter().next().unwrap();
@@ -47,15 +48,17 @@ impl Camera {
                         },
                         dir: (*light_sources - intersection_point).normalize(),
                     };
-                    
 
-                    let ray_to_light_intersections : Vec<V3>= intersections::line_and_sphere_intersection(&ray_to_light, &geometry).unwrap_or(Vec::new());
+
+                    let ray_to_light_intersections : Vec<V3>= geometry.get_intersections_points(&ray_to_light).unwrap_or(Vec::new());
+
 
                     
                     if !ray_to_light_intersections.is_empty() {
                         *pixel = image::Rgb([10, 10, 10]); // Shadow color
                     } else {
-                        *pixel = image::Rgb([geometry.color.r, geometry.color.g, geometry.color.b]); // Lit color
+
+                        *pixel = image::Rgb([geometry.get_color().r, geometry.get_color().g, geometry.get_color().b]); // Lit color
                     }
                 }
             }
